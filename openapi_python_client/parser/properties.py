@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+from typing import (Any, ClassVar, Dict, Generic, List, Optional, Set, TypeVar,
+                    Union)
+
 from dataclasses import InitVar, dataclass, field
-from typing import Any, ClassVar, Dict, Generic, List, Optional, Set, TypeVar, Union
 
 from .. import schema as oai
 from .. import utils
@@ -387,6 +389,7 @@ def property_from_data(
     """ Generate a Property from the OpenAPI dictionary representation of it """
     if isinstance(data, oai.Reference):
         return RefProperty(name=name, required=required, reference=Reference.from_ref(data.ref), default=None)
+    required = required and not data.nullable
     if data.enum:
         return EnumProperty(
             name=name,
@@ -403,8 +406,28 @@ def property_from_data(
                 return PropertyError(detail=f"Invalid property in union {name}", data=sub_prop_data)
             sub_properties.append(sub_prop)
         return UnionProperty(name=name, required=required, default=data.default, inner_properties=sub_properties)
+    if data.allOf:
+        sub_properties: List[Property] = []
+        for sub_prop_data in data.allOf:
+            sub_prop = property_from_data(name=name, required=not data.nullable, data=sub_prop_data)
+            if isinstance(sub_prop, PropertyError):
+                return PropertyError(detail=f"Invalid property in union {name}", data=sub_prop_data)
+            sub_properties.append(sub_prop)
+        # XXX probably needs a new composite type here
+        return UnionProperty(name=name, required=required, default=data.default, inner_properties=sub_properties)
+    if data.oneOf:
+        sub_properties: List[Property] = []
+        for sub_prop_data in data.oneOf:
+            sub_prop = property_from_data(name=name, required=required, data=sub_prop_data)
+            if isinstance(sub_prop, PropertyError):
+                return PropertyError(detail=f"Invalid property in union {name}", data=sub_prop_data)
+            sub_properties.append(sub_prop)
+        # XXX probably needs a new type here... look into discriminator
+        return UnionProperty(name=name, required=required, default=data.default, inner_properties=sub_properties)
     if not data.type:
-        return PropertyError(data=data, detail="Schemas must either have one of enum, anyOf, or type defined.")
+        return PropertyError(
+            data=data, detail="Schemas must either have one of enum, anyOf, oneOf, allOf, or type defined."
+        )
     if data.type == "string":
         return _string_based_property(name=name, required=required, data=data)
     elif data.type == "number":
@@ -419,7 +442,7 @@ def property_from_data(
         inner_prop = property_from_data(name=f"{name}_item", required=True, data=data.items)
         if isinstance(inner_prop, PropertyError):
             return PropertyError(data=inner_prop.data, detail=f"invalid data in items of array {name}")
-        return ListProperty(name=name, required=required, default=data.default, inner_property=inner_prop,)
+        return ListProperty(name=name, required=required, default=data.default, inner_property=inner_prop)
     elif data.type == "object":
         return DictProperty(name=name, required=required, default=data.default)
     return PropertyError(data=data, detail=f"unknown type {data.type}")
