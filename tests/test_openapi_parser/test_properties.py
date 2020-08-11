@@ -413,7 +413,7 @@ class TestDictProperty:
 class TestPropertyFromData:
     def test_property_from_data_enum(self, mocker):
         name = mocker.MagicMock()
-        required = mocker.MagicMock()
+        required = False
         data = mocker.MagicMock(title=None)
         EnumProperty = mocker.patch(f"{MODULE_NAME}.EnumProperty")
 
@@ -585,7 +585,7 @@ class TestPropertyFromData:
 
         data = oai.Schema()
         assert property_from_data(name="blah", required=True, data=data) == PropertyError(
-            data=data, detail="Schemas must either have one of enum, anyOf, or type defined."
+            data=data, detail="Schemas must either have one of enum, anyOf, oneOf, allOf, or type defined."
         )
 
 

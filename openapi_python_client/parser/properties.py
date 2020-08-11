@@ -389,7 +389,7 @@ def property_from_data(
     """ Generate a Property from the OpenAPI dictionary representation of it """
     if isinstance(data, oai.Reference):
         return RefProperty(name=name, required=required, reference=Reference.from_ref(data.ref), default=None)
-    required = required and not data.nullable
+    required = required if not data.nullable else False
     if data.enum:
         return EnumProperty(
             name=name,
