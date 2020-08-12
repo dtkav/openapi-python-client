@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-from typing import (Any, ClassVar, Dict, Generic, List, Optional, Set, TypeVar,
-                    Union)
-
 from dataclasses import InitVar, dataclass, field
+from typing import Any, ClassVar, Dict, Generic, List, Optional, Set, TypeVar, Union
 
 from .. import schema as oai
 from .. import utils
@@ -295,7 +293,7 @@ class EnumProperty(Property):
 
         for i, value in enumerate(values):
             if value[0].isalpha():
-                key = value.upper()
+                key = utils.snake_case(value).upper()
             else:
                 key = f"VALUE_{i}"
             if key in output:

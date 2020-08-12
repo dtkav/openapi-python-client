@@ -193,7 +193,8 @@
                 "title": "AnEnum",
                 "enum": [
                     "FIRST_VALUE",
-                    "SECOND_VALUE"
+                    "SECOND-VALUE",
+                    "THIRD_VALUE:ASC"
                 ],
                 "description": "For testing Enums in all the ways they can be used "
             },
