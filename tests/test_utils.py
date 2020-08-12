@@ -20,5 +20,17 @@ def test_snake_case_from_camel():
     assert utils.snake_case("httpResponseLowerCamel") == "http_response_lower_camel"
 
 
+def test_sanitized_snake_case():
+    assert utils.snake_case("httpResponseLowerCamel:$!*(") == "http_response_lower_camel"
+
+
+def test_sanitized():
+    assert utils.sanitize("1variable_name:$!*(") == "variable_name"
+
+
+def test_sanitized_keyword():
+    assert utils.sanitize("await") == "await_"
+
+
 def test_spinal_case():
     assert utils.spinal_case("keep_alive") == "keep-alive"

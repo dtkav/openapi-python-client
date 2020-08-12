@@ -293,7 +293,7 @@ class EnumProperty(Property):
 
         for i, value in enumerate(values):
             if value[0].isalpha():
-                key = value.upper()
+                key = utils.sanitize(value.upper())
             else:
                 key = f"VALUE_{i}"
             if key in output:

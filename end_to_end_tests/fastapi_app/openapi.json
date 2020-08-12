@@ -244,7 +244,9 @@
                 "title": "AnEnum",
                 "enum": [
                     "FIRST_VALUE",
-                    "SECOND_VALUE"
+                    "camelCase",
+                    "sort:asc",
+                    "type"
                 ],
                 "description": "For testing Enums in all the ways they can be used "
             },
